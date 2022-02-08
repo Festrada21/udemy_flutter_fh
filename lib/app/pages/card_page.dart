@@ -61,7 +61,7 @@ class CardPage extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         elevation: 10,
         child: Column(children: <Widget>[
-          FadeInImage(
+          const FadeInImage(
             image: NetworkImage(
                 'https://cdn.shopify.com/s/files/1/2127/0521/products/PCL1079_-_Milford_Sound_1024x1024.jpg?v=1571609081'),
             placeholder: AssetImage('assets/images/jar-loading.gif'),
