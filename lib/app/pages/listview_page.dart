@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class ListPage extends StatefulWidget {
@@ -8,11 +10,11 @@ class ListPage extends StatefulWidget {
 }
 
 class _ListPageState extends State<ListPage> {
-
-ScrollController _scrollController = ScrollController();
+  ScrollController _scrollController = ScrollController();
 
   List<int> _listaNumeros = [];
   int _ultimoItem = 0;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -20,10 +22,19 @@ ScrollController _scrollController = ScrollController();
     _agregar10();
 
     _scrollController.addListener(() {
-      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
-        _agregar10();
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        // _agregar10();
+        fetchData();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _scrollController.dispose();
   }
 
   @override
@@ -32,13 +43,18 @@ ScrollController _scrollController = ScrollController();
       appBar: AppBar(
         title: const Text('Lists'),
       ),
-      body: _crearLista(),
+      body: Stack(
+        children: [
+          _crearLista(),
+          _crearLoading(),
+        ],
+      ),
     );
   }
 
   Widget _crearLista() {
     return ListView.builder(
-      controller: _scrollController,
+        controller: _scrollController,
         itemCount: _listaNumeros.length,
         itemBuilder: (BuildContext context, int index) {
           final imagen = _listaNumeros[index];
@@ -56,5 +72,46 @@ ScrollController _scrollController = ScrollController();
       _listaNumeros.add(_ultimoItem);
     }
     setState(() {});
+  }
+
+  Future fetchData() async {
+    _isLoading = true;
+    setState(() {});
+
+    const duration = Duration(seconds: 2);
+    return Timer(duration, respuestaHTTP);
+  }
+
+  void respuestaHTTP() {
+    _isLoading = false;
+
+//mueve para arriba un poco la pantalla cuando ya se cargo la informacion
+    _scrollController.animateTo(_scrollController.position.pixels + 100,
+        curve: Curves.fastOutSlowIn, duration: Duration(milliseconds: 250));
+
+    _agregar10();
+  }
+
+  Widget _crearLoading() {
+    if (_isLoading) {
+      return Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(Colors.blue),
+                backgroundColor: Colors.white,
+              ),
+            ],
+          ),
+          SizedBox(height: 15.0),
+        ],
+      );
+    } else {
+      return Container();
+    }
   }
 }
